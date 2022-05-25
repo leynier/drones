@@ -6,3 +6,6 @@ add_migration:
 
 run_migration:
 	alembic upgrade head
+
+test:
+	poetry run pytest --cov=./ --cov-report=xml --cov-report=html -vv
