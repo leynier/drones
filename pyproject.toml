@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "drones"
 version = "0.1.0"
-description = ""
+description = "A solution for the technical task of the recruitment process of Musala Soft."
 authors = ["Leynier Gutiérrez González <leynier41@gmail.com>"]
+homepage = "https://github.com/leynier/drones"
+repository = "https://github.com/leynier/drones"
+documentation = "https://github.com/leynier/drones"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
