@@ -1,25 +1,30 @@
 from enum import IntEnum, auto
-from functools import cache
 from typing import Iterable
 from uuid import UUID, uuid4
 
 import sqlalchemy as sqla
-from drones.settings import Settings
 from fastapi import Depends
 from pydantic import AnyHttpUrl
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
+from sqlmodel import Field, Session, SQLModel, create_engine
 from sqlmodel.sql.expression import Select, SelectOfScalar
+
+from ..settings import Settings, get_settings
 
 SelectOfScalar.inherit_cache = True  # type: ignore
 Select.inherit_cache = True  # type: ignore
 
 
-@cache
-def get_engine(settings: Settings = Depends()) -> sqla.engine.Engine:
-    return create_engine(settings.database_url, echo=settings.database_debug)
+__engine: sqla.engine.Engine | None = None
 
 
-def get_session(engine: sqla.engine.Engine = Depends()) -> Iterable[Session]:
+def get_engine(settings: Settings = Depends(get_settings)) -> sqla.engine.Engine:
+    global __engine
+    if __engine is None:
+        __engine = create_engine(settings.database_url, echo=settings.database_debug)
+    return __engine
+
+
+def get_session(engine: sqla.engine.Engine = Depends(get_engine)) -> Iterable[Session]:
     with Session(engine) as session:
         yield session
 
@@ -56,7 +61,6 @@ class Drone(SQLModel, table=True):
     weight_limit: int = Field(gt=0, le=500, nullable=False)
     battery_capacity: float = Field(ge=0, le=100, nullable=False)
     state: DroneState = Field(nullable=False)
-    medications: list["Medication"] = Relationship(back_populates="drone")
 
 
 class Medication(SQLModel, table=True):
@@ -75,4 +79,3 @@ class Medication(SQLModel, table=True):
     code: str = Field(regex="^[A-Z0-9_]*$", index=True, nullable=False)
     image: AnyHttpUrl = Field(nullable=False)
     drone_id: UUID = Field(foreign_key="drones.id", index=True, nullable=False)
-    drone: Drone = Relationship(back_populates="medications")

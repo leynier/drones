@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     database_debug: bool = False
 
 
-@cache
+__settings: Settings | None = None
+
+
 def get_settings():
-    return Settings()
+    global __settings
+    if __settings is None:
+        __settings = Settings()
+    return __settings
