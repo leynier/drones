@@ -30,14 +30,14 @@ def get_session(engine: sqla.engine.Engine = Depends(get_engine)) -> Iterable[Se
 
 
 class DroneModelType(IntEnum):
-    Lightweight = auto()
+    Lightweight = 0
     Middleweight = auto()
     Cruiserweight = auto()
     Heavyweight = auto()
 
 
 class DroneState(IntEnum):
-    IDLE = auto()
+    IDLE = 0
     LOADING = auto()
     LOADED = auto()
     DELIVERING = auto()
