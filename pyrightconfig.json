@@ -1,0 +1,5 @@
+{
+    "exclude": [
+        "drones/data/migrations/versions",
+    ]
+}
