@@ -9,10 +9,12 @@ from drones.main import app
 from fastapi.testclient import TestClient
 from mimesis.providers import Internet, Numeric, Person
 
+from .conftest import option
 from .mocks import get_drone_mock_repository, get_medication_mock_repository
 
-app.dependency_overrides[get_drone_repository] = get_drone_mock_repository
-app.dependency_overrides[get_medication_repository] = get_medication_mock_repository
+if option.mode == "mock":  # type: ignore
+    app.dependency_overrides[get_drone_repository] = get_drone_mock_repository
+    app.dependency_overrides[get_medication_repository] = get_medication_mock_repository
 
 
 @pytest.fixture(name="faker_internet")
