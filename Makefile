@@ -9,3 +9,6 @@ run_migration:
 
 test:
 	poetry run pytest --cov=./ --cov-report=xml --cov-report=html -vv
+
+cov:
+	python -m http.server -d htmlcov -b 127.0.0.1

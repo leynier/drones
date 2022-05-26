@@ -16,7 +16,7 @@ from ..services.drone_service import DroneService
 router = APIRouter(tags=["Drones"])
 
 
-@router.get("/", response_model=list[DroneGetSchema])
+@router.get("", response_model=list[DroneGetSchema])
 def get_drones(
     state: DroneState | None = None,
     drone_service: DroneService = Depends(get_drone_service),
@@ -32,12 +32,20 @@ def get_drone(
     return drone_service.get_drone(drone_id)
 
 
-@router.post("/", response_model=DroneGetSchema)
+@router.post("", response_model=DroneGetSchema)
 def post_drone(
     drone: DronePostSchema,
     drone_service: DroneService = Depends(get_drone_service),
 ):
     return drone_service.add_drone(drone)
+
+
+@router.delete("/{drone_id}")
+def delete_drone(
+    drone_id: UUID,
+    drone_service: DroneService = Depends(get_drone_service),
+):
+    return drone_service.remove_drone(drone_id)
 
 
 @router.get("/{drone_id}/medications", response_model=list[MedicationGetSchema])

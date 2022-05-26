@@ -34,11 +34,10 @@ class MedicationBaseSchema(BaseModel):
     weight: int = Field(ge=0)
     code: str = Field(regex="^[A-Z0-9_]*$")
     image: AnyHttpUrl
-    drone_id: UUID
 
 
 class MedicationGetSchema(MedicationBaseSchema, IdSchema):
-    pass
+    drone_id: UUID
 
 
 class MedicationPostSchema(MedicationBaseSchema):

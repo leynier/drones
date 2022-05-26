@@ -49,7 +49,7 @@ class DroneService:
         if entity is None:
             raise DroneNotFoundError("Drone not found")
         medications = self.__medication_repository.get_medications(drone_id)
-        if not medications:
+        if medications:
             raise DroneCantBeDeletedError("Drone cannot be deleted")
         self.__drone_repository.remove_drone(entity)
 
@@ -79,7 +79,7 @@ class DroneService:
         total_weight = sum(medication.weight for medication in medications)
         if total_weight + medication.weight > entity.weight_limit:
             raise DroneCantLoadMedicationsError("Drone cannot load medication")
-        entity = Medication(**medication.dict())
+        entity = Medication(**medication.dict(), drone_id=drone_id)
         self.__medication_repository.add_medication(entity)
         return MedicationGetSchema(**entity.dict())
 

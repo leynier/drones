@@ -137,6 +137,17 @@ tomli = {version = "*", optional = true, markers = "python_version < \"3.11\" an
 toml = ["tomli"]
 
 [[package]]
+name = "dirty-equals"
+version = "0.4"
+description = "Doing dirty (but extremely useful) things with equals."
+category = "dev"
+optional = false
+python-versions = ">=3.7.0,<4.0.0"
+
+[package.dependencies]
+pytz = ">=2021.3"
+
+[[package]]
 name = "dnspython"
 version = "2.2.1"
 description = "DNS toolkit"
@@ -328,6 +339,14 @@ description = "McCabe checker, plugin for flake8"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "mimesis"
+version = "5.4.0"
+description = "Mimesis: Fake Data Generator."
+category = "dev"
+optional = false
+python-versions = ">=3.8,<4.0"
 
 [[package]]
 name = "mypy-extensions"
@@ -524,6 +543,14 @@ python-versions = "*"
 
 [package.dependencies]
 six = ">=1.4.0"
+
+[[package]]
+name = "pytz"
+version = "2022.1"
+description = "World timezone definitions, modern and historical"
+category = "dev"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "pyyaml"
@@ -732,7 +759,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "81c47e688e129dc4a9e4b8ed8c4ac39c2451984de168c6018b2ab93007053e18"
+content-hash = "af6d291992c2408521a9375a4682062c7f16f53ba2ca200dc46765a0440d6190"
 
 [metadata.files]
 alembic = [
@@ -838,6 +865,10 @@ coverage = [
     {file = "coverage-6.4-cp39-cp39-win_amd64.whl", hash = "sha256:e35217031e4b534b09f9b9a5841b9344a30a6357627761d4218818b865d45055"},
     {file = "coverage-6.4-pp36.pp37.pp38-none-any.whl", hash = "sha256:e637ae0b7b481905358624ef2e81d7fb0b1af55f5ff99f9ba05442a444b11e45"},
     {file = "coverage-6.4.tar.gz", hash = "sha256:727dafd7f67a6e1cad808dc884bd9c5a2f6ef1f8f6d2f22b37b96cb0080d4f49"},
+]
+dirty-equals = [
+    {file = "dirty-equals-0.4.tar.gz", hash = "sha256:244128dcb52a42cbdfedba17ea91a40ed50094e7c4e4d17977ec9ce90d4ea6b1"},
+    {file = "dirty_equals-0.4-py3-none-any.whl", hash = "sha256:24b0b480c2c223655ead42aa41c515f1a6d3c22d2bf2d26cc8f78725c83dd4c4"},
 ]
 dnspython = [
     {file = "dnspython-2.2.1-py3-none-any.whl", hash = "sha256:a851e51367fb93e9e1361732c1d60dab63eff98712e503ea7d92e6eccb109b4f"},
@@ -1026,6 +1057,10 @@ mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
+mimesis = [
+    {file = "mimesis-5.4.0-py3-none-any.whl", hash = "sha256:2337e03893699dc78675b3a9c596387effdcb4dbde1fdc55dacdaf1b35d69c12"},
+    {file = "mimesis-5.4.0.tar.gz", hash = "sha256:3a166287c48c1d5ae1253e76378cd1a7e144233989da00f8c8afe26b4feb8872"},
+]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
@@ -1155,6 +1190,10 @@ python-dotenv = [
 ]
 python-multipart = [
     {file = "python-multipart-0.0.5.tar.gz", hash = "sha256:f7bb5f611fc600d15fa47b3974c8aa16e93724513b49b5f95c81e6624c83fa43"},
+]
+pytz = [
+    {file = "pytz-2022.1-py2.py3-none-any.whl", hash = "sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c"},
+    {file = "pytz-2022.1.tar.gz", hash = "sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7"},
 ]
 pyyaml = [
     {file = "PyYAML-6.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d4db7c7aef085872ef65a8fd7d6d09a14ae91f691dec3e87ee5ee0539d516f53"},

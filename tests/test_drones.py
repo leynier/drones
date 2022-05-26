@@ -1,10 +1,13 @@
+from http import HTTPStatus
 from typing import Iterable
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
+from dirty_equals import HasLen, IsList, IsPartialDict, IsUUID
 from drones.deps import get_drone_repository, get_medication_repository
 from drones.main import app
 from fastapi.testclient import TestClient
+from mimesis.providers import Internet, Numeric, Person
 
 from .mocks import get_drone_mock_repository, get_medication_mock_repository
 
@@ -12,68 +15,190 @@ app.dependency_overrides[get_drone_repository] = get_drone_mock_repository
 app.dependency_overrides[get_medication_repository] = get_medication_mock_repository
 
 
+@pytest.fixture(name="faker_internet")
+def fixture_faker_internet() -> Internet:
+    return Internet()
+
+
+@pytest.fixture(name="faker_numeric")
+def faker_hadware_fixture() -> Numeric:
+    return Numeric()
+
+
+@pytest.fixture(name="faker_person")
+def faker_person_fixture() -> Person:
+    return Person()
+
+
 @pytest.fixture(name="client")
-def create_client() -> Iterable[TestClient]:
+def client_fixture() -> Iterable[TestClient]:
     with TestClient(app) as client:
         yield client
 
 
-def test_post_drone(client: TestClient) -> None:
+drone = {}
+drone_id = uuid4()
+medication = {}
+medication_id = uuid4()
+
+
+def test_index_redirect_to_docs(client: TestClient) -> None:
+    response = client.get("/", allow_redirects=False)
+    assert response.is_redirect
+
+
+def test_post_drone(
+    client: TestClient,
+    faker_numeric: Numeric,
+) -> None:
+    global drone, drone_id
     drone = {
-        "serial_number": "12345678901234567890123456789012",
-        "model": 0,
-        "weight_limit": 100,
-        "battery_capacity": 100,
-        "state": 0,
+        "serial_number": str(faker_numeric.integer_number(start=0, end=10**6)),
+        "model": faker_numeric.integer_number(start=0, end=3),
+        "weight_limit": faker_numeric.integer_number(start=1, end=400),
+        "battery_capacity": faker_numeric.integer_number(start=0, end=100),
+        "state": faker_numeric.integer_number(start=0, end=5),
     }
-    response = client.post("/drones/", json=drone)
+    response = client.post("/drones", json=drone)
     response.raise_for_status()
     data = response.json()
-    assert data
-    assert isinstance(data, dict)
-    assert "id" in data
-    assert data["id"]
-    assert UUID(data["id"])
-    del data["id"]
-    assert data == drone
+    assert data == IsPartialDict(**drone)
+    assert data == IsPartialDict(id=IsUUID)
+    drone_id = UUID(data["id"])
 
 
 @pytest.mark.depends(on=[test_post_drone.__name__])
 def test_get_drone(client: TestClient) -> None:
-    drone = {
-        "serial_number": "12345678901234567890123456789012",
-        "model": 0,
-        "weight_limit": 100,
-        "battery_capacity": 100,
-        "state": 0,
-    }
-    response = client.get("/drones/", json=drone)
+    response = client.get(f"/drones/{drone_id}")
     response.raise_for_status()
     data = response.json()
-    assert data
-    assert isinstance(data, list)
-    assert len(data) == 1
-    assert data[0]
-    assert isinstance(data[0], dict)
-    assert "id" in data[0]
-    assert data[0]["id"]
-    assert UUID(data[0]["id"])
-    data_id = data[0]["id"]
-    del data[0]["id"]
-    assert data[0] == drone
+    assert data == IsPartialDict(**drone)
+    assert data == IsPartialDict(id=str(drone_id))
 
-    response = client.get(f"/drones/{data_id}")
+
+@pytest.mark.depends(on=[test_get_drone.__name__])
+def test_get_drones(client: TestClient) -> None:
+    response = client.get("/drones", json=drone)
     response.raise_for_status()
     data = response.json()
-    assert data
-    assert isinstance(data, dict)
-    assert "id" in data
-    assert data["id"]
-    assert UUID(data["id"])
-    assert data["id"] == data_id
-    del data["id"]
-    assert "medications" in data
-    assert isinstance(data["medications"], list)
-    assert len(data["medications"]) == 0
-    del data["medications"]
-    assert data == drone
+    assert data == IsList(IsPartialDict(**drone, id=str(drone_id)))
+
+
+@pytest.mark.depends(on=[test_get_drones.__name__])
+def test_get_drones_by_state(client: TestClient) -> None:
+    response = client.get("/drones", params={"state": drone["state"]})
+    response.raise_for_status()
+    data = response.json()
+    assert data == IsList(IsPartialDict(**drone, id=str(drone_id)))
+
+
+@pytest.mark.depends(on=[test_get_drones_by_state.__name__])
+def test_post_medication(
+    client: TestClient,
+    faker_internet: Internet,
+    faker_numeric: Numeric,
+    faker_person: Person,
+) -> None:
+    global medication, medication_id
+    medication = {
+        "name": faker_person.name(),
+        "weight": faker_numeric.integer_number(start=1, end=drone["weight_limit"]),
+        "code": str(faker_numeric.integer_number(start=0)),
+        "image": faker_internet.url(),
+    }
+    response = client.post(f"/drones/{drone_id}/medications", json=medication)
+    response.raise_for_status()
+    data = response.json()
+    assert data == IsPartialDict(**medication)
+    assert data == IsPartialDict(id=IsUUID, drone_id=str(drone_id))
+    medication_id = UUID(data["id"])
+
+
+@pytest.mark.depends(on=[test_post_medication.__name__])
+def test_post_medications_over_weight(
+    client: TestClient,
+    faker_internet: Internet,
+    faker_numeric: Numeric,
+    faker_person: Person,
+) -> None:
+    medication = {
+        "name": faker_person.name(),
+        "weight": faker_numeric.integer_number(
+            start=drone["weight_limit"] + 1,
+            end=drone["weight_limit"] + 5,
+        ),
+        "code": str(faker_numeric.integer_number(start=0)),
+        "image": faker_internet.url(),
+    }
+    response = client.post(f"/drones/{drone_id}/medications", json=medication)
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+@pytest.mark.depends(on=[test_post_medications_over_weight.__name__])
+def test_delete_drone_with_medications(client: TestClient) -> None:
+    response = client.delete(f"/drones/{drone_id}")
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+@pytest.mark.depends(on=[test_delete_drone_with_medications.__name__])
+def test_get_medication(client: TestClient) -> None:
+    response = client.get(f"/drones/{drone_id}/medications")
+    response.raise_for_status()
+    data = response.json()
+    assert data == IsList(IsPartialDict(**medication, id=str(medication_id)))
+
+
+@pytest.mark.depends(on=[test_get_medication.__name__])
+def test_delete_medication(client: TestClient) -> None:
+    response = client.delete(f"/drones/{drone_id}/medications/{medication_id}")
+    response.raise_for_status()
+
+
+@pytest.mark.depends(on=[test_delete_medication.__name__])
+def test_get_medication_not_found(client: TestClient) -> None:
+    response = client.get(f"/drones/{drone_id}/medications")
+    response.raise_for_status()
+    data = response.json()
+    assert data == IsList()
+    assert data == HasLen(0)
+
+
+@pytest.mark.depends(on=[test_get_medication_not_found.__name__])
+def test_delete_drone(client: TestClient) -> None:
+    response = client.delete(f"/drones/{drone_id}")
+    response.raise_for_status()
+
+
+@pytest.mark.depends(on=[test_delete_drone.__name__])
+def test_get_drone_not_found_in_get(client: TestClient) -> None:
+    response = client.get(f"/drones/{drone_id}")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.depends(on=[test_delete_drone.__name__])
+def test_delete_drone_not_found_in_delete(client: TestClient) -> None:
+    response = client.delete(f"/drones/{drone_id}")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.depends(on=[test_delete_drone.__name__])
+def test_post_medication_not_found_in_post(
+    client: TestClient,
+    faker_internet: Internet,
+    faker_numeric: Numeric,
+    faker_person: Person,
+) -> None:
+    medication = {
+        "name": faker_person.name(),
+        "weight": faker_numeric.integer_number(start=1, end=drone["weight_limit"]),
+        "code": str(faker_numeric.integer_number(start=0)),
+        "image": faker_internet.url(),
+    }
+    response = client.post(f"/drones/{drone_id}/medications", json=medication)
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.depends(on=[test_delete_medication.__name__])
+def test_delete_medication_not_found_in_delete(client: TestClient) -> None:
+    response = client.delete(f"/drones/{drone_id}/medications/{medication_id}")
+    assert response.status_code == HTTPStatus.NOT_FOUND
