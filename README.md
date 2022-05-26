@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Tests](https://github.com/leynier/drones/actions/workflows/tests.yml/badge.svg)](https://github.com/leynier/drones/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/gh/leynier/drones/branch/master/graph/badge.svg?token=iE7nhtLEd4)](https://codecov.io/gh/leynier/drones)
+[![codecov](https://codecov.io/gh/leynier/drones/branch/main/graph/badge.svg?token=iE7nhtLEd4)](https://codecov.io/gh/leynier/drones)
 [![Last commit](https://img.shields.io/github/last-commit/leynier/drones.svg?style=flat)](https://github.com/leynier/drones/commits)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/leynier/drones)](https://github.com/leynier/drones/commits)
 [![Github Stars](https://img.shields.io/github/stars/leynier/drones?style=flat&logo=github)](https://github.com/leynier/drones/stargazers)
