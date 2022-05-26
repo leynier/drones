@@ -29,5 +29,5 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
     - name: Run tests
       run: make test
-    # - name: Upload coverage
-    #   uses: codecov/codecov-action@v2
+    - name: Upload coverage
+      uses: codecov/codecov-action@v2
