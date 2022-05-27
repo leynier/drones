@@ -204,3 +204,33 @@ def test_post_medication_not_found_in_post(
 def test_delete_medication_not_found_in_delete(client: TestClient) -> None:
     response = client.delete(f"/drones/{drone_id}/medications/{medication_id}")
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_insert_drone_with_20_of_batery(
+    client: TestClient,
+    faker_internet: Internet,
+    faker_numeric: Numeric,
+    faker_person: Person,
+) -> None:
+    drone = {
+        "serial_number": str(faker_numeric.integer_number(start=0, end=10**6)),
+        "model": faker_numeric.integer_number(start=0, end=3),
+        "weight_limit": faker_numeric.integer_number(start=1, end=400),
+        "battery_capacity": faker_numeric.integer_number(start=0, end=20),
+        "state": faker_numeric.integer_number(start=0, end=5),
+    }
+    response = client.post("/drones", json=drone)
+    response.raise_for_status()
+    data = response.json()
+    assert data == IsPartialDict(**drone, id=IsUUID)
+    drone_id = UUID(data["id"])
+    medication = {
+        "name": faker_person.name(),
+        "weight": faker_numeric.integer_number(start=1, end=drone["weight_limit"]),
+        "code": str(faker_numeric.integer_number(start=0)),
+        "image": faker_internet.url(),
+    }
+    response = client.post(f"/drones/{drone_id}/medications", json=medication)
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    response = client.delete(f"/drones/{drone_id}")
+    response.raise_for_status()

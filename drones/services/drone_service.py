@@ -75,10 +75,16 @@ class DroneService:
         entity = self.__drone_repository.get_drone(drone_id)
         if entity is None:
             raise DroneNotFoundError("Drone not found")
+        if entity.battery_capacity < 25:
+            raise DroneCantLoadMedicationsError(
+                "Drone cannot load medication because it is low on battery"
+            )
         medications = self.__medication_repository.get_medications(drone_id)
         total_weight = sum(medication.weight for medication in medications)
         if total_weight + medication.weight > entity.weight_limit:
-            raise DroneCantLoadMedicationsError("Drone cannot load medication")
+            raise DroneCantLoadMedicationsError(
+                "Drone cannot load medication because it is full"
+            )
         entity = Medication(**medication.dict(), drone_id=drone_id)
         self.__medication_repository.add_medication(entity)
         return MedicationGetSchema(**entity.dict())
