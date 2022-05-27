@@ -35,9 +35,11 @@ class DroneService:
         self,
         drone_repository: DroneRepository,
         medication_repository: MedicationRepository,
+        min_battery_capacity_for_loading: int,
     ) -> None:
         self.__drone_repository = drone_repository
         self.__medication_repository = medication_repository
+        self.__min_battery_capacity_for_loading = min_battery_capacity_for_loading
 
     def add_drone(self, drone: DronePostSchema) -> DroneGetSchema:
         entity = Drone(**drone.dict())
@@ -75,7 +77,7 @@ class DroneService:
         entity = self.__drone_repository.get_drone(drone_id)
         if entity is None:
             raise DroneNotFoundError("Drone not found")
-        if entity.battery_capacity < 25:
+        if entity.battery_capacity < self.__min_battery_capacity_for_loading:
             raise DroneCantLoadMedicationsError(
                 "Drone cannot load medication because it is low on battery"
             )

@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///drones.db"
     database_debug: bool = False
 
+    min_battery_capacity_for_loading: int = 25
+
 
 __settings: Settings | None = None
 
