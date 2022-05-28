@@ -2,7 +2,16 @@ from http import HTTPStatus
 from typing import Iterable
 
 import pytest
-from dirty_equals import HasLen, IsList, IsPartialDict, IsUUID
+from dirty_equals import (
+    HasLen,
+    IsAnyStr,
+    IsDict,
+    IsFloat,
+    IsInt,
+    IsList,
+    IsPartialDict,
+    IsUUID,
+)
 from drones.data.database import new_uuid
 from drones.main import app
 from drones.settings import Settings, get_settings
@@ -84,7 +93,16 @@ def test_get_drones(client: TestClient) -> None:
     response = client.get("/drones", json=drone)
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data == IsList(IsPartialDict(**drone, id=drone_id))
+    assert data == IsList(
+        IsPartialDict(
+            id=IsUUID,
+            serial_number=IsAnyStr(max_length=100),
+            model=IsInt(ge=0, le=3),
+            weight_limit=IsInt(gt=0, le=500),
+            battery_capacity=IsFloat(ge=0, le=100),
+            state=IsInt(ge=0, le=5),
+        )
+    )
 
 
 @pytest.mark.depends(on=[test_get_drones.__name__])
@@ -92,7 +110,17 @@ def test_get_drones_by_state(client: TestClient) -> None:
     response = client.get("/drones", params={"state": drone["state"]})
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data == IsList(IsPartialDict(**drone, id=drone_id))
+    assert data == IsList(
+        IsPartialDict(
+            id=IsUUID,
+            serial_number=IsAnyStr(max_length=100),
+            model=IsInt(ge=0, le=3),
+            weight_limit=IsInt(gt=0, le=500),
+            battery_capacity=IsFloat(ge=0, le=100),
+            state=IsInt(ge=0, le=5),
+        ),
+        check_order=False,
+    )
 
 
 @pytest.mark.depends(on=[test_get_drones_by_state.__name__])

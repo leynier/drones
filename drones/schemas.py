@@ -31,7 +31,7 @@ class DronePostSchema(DroneBaseSchema):
 
 class MedicationBaseSchema(BaseModel):
     name: str = Field(regex="^[A-Za-z0-9_-]*$")
-    weight: int = Field(ge=0)
+    weight: int = Field(gt=0)
     code: str = Field(regex="^[A-Z0-9_]*$")
     image: AnyHttpUrl
 

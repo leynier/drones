@@ -84,7 +84,7 @@ class Medication(SQLModel, table=True):
         },
     )
     name: str = Field(regex="^[A-Za-z0-9_-]*$", nullable=False)
-    weight: int = Field(ge=0, nullable=False)
+    weight: int = Field(gt=0, nullable=False)
     code: str = Field(regex="^[A-Z0-9_]*$", index=True, nullable=False)
     image: AnyHttpUrl = Field(nullable=False)
     drone_id: UUID = Field(foreign_key="drones.id", index=True, nullable=False)
