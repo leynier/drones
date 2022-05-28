@@ -20,7 +20,12 @@ __engine: sqla.engine.Engine | None = None
 def get_engine(settings: Settings = Depends(get_settings)) -> sqla.engine.Engine:
     global __engine
     if __engine is None:
-        __engine = create_engine(settings.database_url, echo=settings.database_debug)
+        connect_args = {"check_same_thread": False}
+        __engine = create_engine(
+            settings.database_url,
+            echo=settings.database_debug,
+            connect_args=connect_args,
+        )
     return __engine
 
 

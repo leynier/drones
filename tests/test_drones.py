@@ -3,10 +3,10 @@ from typing import Iterable
 
 import pytest
 from dirty_equals import (
-    HasLen,
+    Contains,
     IsAnyStr,
-    IsDict,
     IsFloat,
+    IsInstance,
     IsInt,
     IsList,
     IsPartialDict,
@@ -93,15 +93,19 @@ def test_get_drones(client: TestClient) -> None:
     response = client.get("/drones", json=drone)
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data == IsInstance(list)
     assert data == IsList(
-        IsPartialDict(
-            id=IsUUID,
-            serial_number=IsAnyStr(max_length=100),
-            model=IsInt(ge=0, le=3),
-            weight_limit=IsInt(gt=0, le=500),
-            battery_capacity=IsFloat(ge=0, le=100),
-            state=IsInt(ge=0, le=5),
-        )
+        *[
+            IsPartialDict(
+                id=IsUUID,
+                serial_number=IsAnyStr(max_length=100),
+                model=IsInt(ge=0, le=3),
+                weight_limit=IsInt(gt=0, le=500),
+                battery_capacity=IsFloat(ge=0, le=100),
+                state=IsInt(ge=0, le=5),
+            )
+            for _ in range(len(data))
+        ]
     )
 
 
@@ -110,16 +114,19 @@ def test_get_drones_by_state(client: TestClient) -> None:
     response = client.get("/drones", params={"state": drone["state"]})
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data == IsInstance(list)
     assert data == IsList(
-        IsPartialDict(
-            id=IsUUID,
-            serial_number=IsAnyStr(max_length=100),
-            model=IsInt(ge=0, le=3),
-            weight_limit=IsInt(gt=0, le=500),
-            battery_capacity=IsFloat(ge=0, le=100),
-            state=IsInt(ge=0, le=5),
-        ),
-        check_order=False,
+        *[
+            IsPartialDict(
+                id=IsUUID,
+                serial_number=IsAnyStr(max_length=100),
+                model=IsInt(ge=0, le=3),
+                weight_limit=IsInt(gt=0, le=500),
+                battery_capacity=IsFloat(ge=0, le=100),
+                state=IsInt(ge=0, le=5),
+            )
+            for _ in range(len(data))
+        ]
     )
 
 
@@ -176,7 +183,8 @@ def test_get_medication(client: TestClient) -> None:
     response = client.get(f"/drones/{drone_id}/medications")
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data == IsList(IsPartialDict(**medication, id=str(medication_id)))
+    assert data == IsInstance(list)
+    assert data == Contains(IsPartialDict(**medication, id=medication_id))
 
 
 @pytest.mark.depends(on=[test_get_medication.__name__])
@@ -191,7 +199,6 @@ def test_get_medication_not_found(client: TestClient) -> None:
     assert response.status_code == 200, response.text
     data = response.json()
     assert data == IsList()
-    assert data == HasLen(0)
 
 
 @pytest.mark.depends(on=[test_get_medication_not_found.__name__])
