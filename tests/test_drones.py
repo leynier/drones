@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from typing import Iterable
-from uuid import UUID, uuid4
 
 import pytest
 from dirty_equals import HasLen, IsList, IsPartialDict, IsUUID
+from drones.data.database import new_uuid
 from drones.main import app
 from drones.settings import Settings, get_settings
 from fastapi.testclient import TestClient
@@ -37,9 +37,9 @@ def client_fixture() -> Iterable[TestClient]:
 
 
 drone = {}
-drone_id = uuid4()
+drone_id = str(new_uuid())
 medication = {}
-medication_id = uuid4()
+medication_id = str(new_uuid())
 
 
 def test_index_redirect_to_docs(client: TestClient) -> None:
@@ -67,7 +67,7 @@ def test_post_drone(
     data = response.json()
     assert data == IsPartialDict(**drone)
     assert data == IsPartialDict(id=IsUUID)
-    drone_id = UUID(data["id"])
+    drone_id = data["id"]
 
 
 @pytest.mark.depends(on=[test_post_drone.__name__])
@@ -76,7 +76,7 @@ def test_get_drone(client: TestClient) -> None:
     assert response.status_code == 200, response.text
     data = response.json()
     assert data == IsPartialDict(**drone)
-    assert data == IsPartialDict(id=str(drone_id))
+    assert data == IsPartialDict(id=drone_id)
 
 
 @pytest.mark.depends(on=[test_get_drone.__name__])
@@ -84,7 +84,7 @@ def test_get_drones(client: TestClient) -> None:
     response = client.get("/drones", json=drone)
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data == IsList(IsPartialDict(**drone, id=str(drone_id)))
+    assert data == IsList(IsPartialDict(**drone, id=drone_id))
 
 
 @pytest.mark.depends(on=[test_get_drones.__name__])
@@ -92,7 +92,7 @@ def test_get_drones_by_state(client: TestClient) -> None:
     response = client.get("/drones", params={"state": drone["state"]})
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data == IsList(IsPartialDict(**drone, id=str(drone_id)))
+    assert data == IsList(IsPartialDict(**drone, id=drone_id))
 
 
 @pytest.mark.depends(on=[test_get_drones_by_state.__name__])
@@ -113,8 +113,8 @@ def test_post_medication(
     assert response.status_code == 200, response.text
     data = response.json()
     assert data == IsPartialDict(**medication)
-    assert data == IsPartialDict(id=IsUUID, drone_id=str(drone_id))
-    medication_id = UUID(data["id"])
+    assert data == IsPartialDict(id=IsUUID, drone_id=drone_id)
+    medication_id = data["id"]
 
 
 @pytest.mark.depends(on=[test_post_medication.__name__])
@@ -228,7 +228,7 @@ def test_insert_drone_with_low_of_batery(
     assert response.status_code == 200, response.text
     data = response.json()
     assert data == IsPartialDict(**drone, id=IsUUID)
-    drone_id = UUID(data["id"])
+    drone_id = data["id"]
     medication = {
         "name": faker_person.name(),
         "weight": faker_numeric.integer_number(start=1, end=drone["weight_limit"] - 1),
