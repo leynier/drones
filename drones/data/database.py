@@ -29,6 +29,15 @@ def get_session(engine: sqla.engine.Engine = Depends(get_engine)) -> Iterable[Se
         yield session
 
 
+def new_uuid() -> UUID:
+    # Note: Work around UUIDs with leading zeros: https://github.com/tiangolo/sqlmodel/issues/25
+    # by making sure uuid str does not start with a leading 0
+    val = uuid4()
+    while val.hex[0] == "0":
+        val = uuid4()
+    return val
+
+
 class DroneModelType(IntEnum):
     Lightweight = 0
     Middleweight = auto()
@@ -47,11 +56,11 @@ class DroneState(IntEnum):
 
 class Drone(SQLModel, table=True):
     __tablename__: str = "drones"
-    id: UUID | None = Field(
+    id: UUID = Field(
         primary_key=True,
         index=True,
         nullable=False,
-        default_factory=uuid4,
+        default_factory=new_uuid,
         sa_column_kwargs={
             "server_default": sqla.text("uuid_generate_v4()"),
         },
@@ -65,11 +74,11 @@ class Drone(SQLModel, table=True):
 
 class Medication(SQLModel, table=True):
     __tablename__: str = "medications"
-    id: UUID | None = Field(
+    id: UUID = Field(
         primary_key=True,
         index=True,
         nullable=False,
-        default_factory=uuid4,
+        default_factory=new_uuid,
         sa_column_kwargs={
             "server_default": sqla.text("uuid_generate_v4()"),
         },
