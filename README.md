@@ -12,3 +12,24 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/leynier/drones)](https://github.com/leynier/drones/graphs/contributors)
 
 A solution for the technical task of the recruitment process of Musala Soft.
+
+## Getting started
+
+### Prerequisites
+
+- Sqlite3: [installation instructions](https://www.sqlite.org/index.html)
+- Python: [installation instructions](https://www.python.org/downloads/)
+- Poetry: [installation instructions](https://python-poetry.org/docs/master/#installation)
+- Make: [installation instructions](https://www.gnu.org/software/make/manual/make.html)
+
+### Quick start
+
+```bash
+make
+```
+
+### Run tests
+
+```bash
+make test
+```

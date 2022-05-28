@@ -1,3 +1,8 @@
+quickstart: install run_migration run
+
+install:
+	poetry install
+
 run:
 	poetry run uvicorn drones.main:app
 
