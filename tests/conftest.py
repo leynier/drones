@@ -1,8 +1,8 @@
-from argparse import Namespace
-
+from drones.deps import get_drone_repository, get_medication_repository
+from drones.main import app
 from pytest import Config, Parser
 
-option: Namespace | None = None
+from .mocks import get_drone_mock_repository, get_medication_mock_repository
 
 
 def pytest_addoption(parser: Parser):
@@ -10,5 +10,8 @@ def pytest_addoption(parser: Parser):
 
 
 def pytest_configure(config: Config):
-    global option
-    option = config.option
+    if config.option.mode == "mock":  # type: ignore
+        app.dependency_overrides[get_drone_repository] = get_drone_mock_repository
+        app.dependency_overrides[
+            get_medication_repository
+        ] = get_medication_mock_repository
