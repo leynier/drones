@@ -13,6 +13,7 @@ from .handlers import (
 )
 from .loggers import config_loggers
 from .routes.drones_router import router as drones_router
+from .seed import run_seed
 from .services.drone_service import (
     DroneCantBeDeletedError,
     DroneCantLoadMedicationsError,
@@ -52,8 +53,15 @@ def index():
 
 
 @app.on_event("startup")
+def seed_event():
+    settings = get_settings()
+    if settings.seed:
+        run_seed(settings)
+
+
+@app.on_event("startup")
 @repeat_every(seconds=get_settings().time_interval_battery)
-def startup():
+def log_battery_capacity_event():
     logger_name = get_settings().logger_drones_batteries_capacity_name
     logger = logging.getLogger(logger_name)
     with DroneServiceWithoutDepends() as service:

@@ -47,7 +47,7 @@ class DroneState(IntEnum):
 
 class Drone(SQLModel, table=True):
     __tablename__: str = "drones"
-    id: UUID = Field(
+    id: UUID | None = Field(
         primary_key=True,
         index=True,
         nullable=False,
@@ -65,7 +65,7 @@ class Drone(SQLModel, table=True):
 
 class Medication(SQLModel, table=True):
     __tablename__: str = "medications"
-    id: UUID = Field(
+    id: UUID | None = Field(
         primary_key=True,
         index=True,
         nullable=False,
